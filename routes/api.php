@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CardController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,7 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('user')->group(function (){
+Route::prefix('users')->group(function (){
 
 	Route::post('/sign-up', [UserController::class, 'signUpUser']);
 
@@ -30,8 +32,8 @@ Route::prefix('user')->group(function (){
 
 });
 
-Route::prefix('selling')->group(function (){
+Route::prefix('cards')->group(function (){
 
-    Route::get('/cards/list/{name}', [SellingController::class, 'cardsByName']);
-    
+    Route::get('/selling/list/{name}', [CardController::class, 'cardsByPrice']);
+
 });
