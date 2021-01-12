@@ -17,3 +17,21 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::prefix('user')->group(function (){
+
+	Route::post('/sign-up', [UserController::class, 'signUpUser']);
+
+	Route::post('/restorePassword', [UserController::class, 'restorePassword']);
+
+	Route::post('/register/card', [UserController::class, 'registerCard']);
+
+    Route::post('/register/collection', [UserController::class, 'registerCollection']);
+
+});
+
+Route::prefix('selling')->group(function (){
+
+    Route::get('/cards/list/{name}', [SellingController::class, 'cardsByName']);
+    
+});
