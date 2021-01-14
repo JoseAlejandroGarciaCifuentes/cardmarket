@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\SellingController;
 
+use App\Http\Middleware\AuthAdmin;
+use App\Http\Middleware\AuthNonAdmin;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,27 +21,22 @@ use App\Http\Controllers\CollectionController;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::prefix('users')->group(function (){
 
     Route::post('/signup', [UserController::class, 'signUp']);
     
     Route::post('/login', [UserController::class, 'login']);
 
-	Route::post('/restorePassword', [UserController::class, 'restorePassword']);
-
-    Route::post('/register/collection', [UserController::class, 'registerCollection']);
-
+    Route::post('/restorePassword', [UserController::class, 'restorePassword']);
+    
+    Route::post('/make/admin/{id}/{token}', [UserController::class, 'makeAdmin'])->middleware(AuthAdmin::class);
 });
 
 Route::prefix('cards')->group(function (){
 
     Route::get('/selling/list/{name}', [CardController::class, 'sellingsByPrice']);
 
-    Route::post('/register/card', [CardController::class, 'registerCard']);
+    Route::post('/register/new-card/{token}', [CardController::class, 'registerCard']);
     
     Route::get('/all/{name}', [CardController::class, 'cardsByName']);
 
@@ -46,6 +44,16 @@ Route::prefix('cards')->group(function (){
 
 Route::prefix('collections')->group(function (){
 
-    Route::post('/assign/card', [CollectionController::class, 'assignCard']);
+    Route::post('/assign/card/{token}', [CollectionController::class, 'assignCard'])->middleware(AuthAdmin::class);
+
+    Route::post('/edit/{id}/{token}', [CollectionController::class, 'editCollection'])->middleware(AuthAdmin::class);
+
+    Route::post('/register/new-collection/{token}', [CollectionController::class, 'registerCollection'])->middleware(AuthAdmin::class);
+
+});
+
+Route::prefix('sellings')->group(function (){
+
+    Route::post('/put-to-sell/{id}/{token}', [SellingController::class, 'startSelling'])->middleware(AuthNonAdmin::class);;
 
 });

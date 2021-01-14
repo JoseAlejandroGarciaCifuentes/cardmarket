@@ -34,12 +34,104 @@ class CollectionController extends Controller
         return response($response);
     }
 
-    public function editCollection(Request $request){
+    public function editCollection(Request $request, $id){
 
+        $response = "";
 
+		$collection = Collection::find($id);
+
+		if($collection){
+
+			$data = $request->getContent();
+			$data = json_decode($data);
+
+			if($data){
+
+				$collection->name = (isset($data->name) ? $data->name: $collection->name);
+                $collection->symbol = (isset($data->symbol) ? $data->symbol: $collection->symbol);
+                $collection->creation_date = (isset($data->creation_date) ? $data->creation_date: $soldier->creation_date);
+
+				try{
+					$collection->save();
+					$response = "Colección editada";
+				}catch(\Exception $e){
+					$response = $e->getMessage();
+				}
+			}
+			
+		}else{
+			$response = "No existe dicha colección";
+		}
+		
+		return response($response);
     }
 
-    public function createCollection(Request $request){
+    public function registerCollection(Request $request){
+
+        $response = [];
+		$data = $request->getContent();
+		$data = json_decode($data);
+
+		$collection = new Collection();
+		
+		if($data){
+
+			$collection->name = $data->name;
+			$collection->symbol = $data->symbol;
+			$collection->admin_id = $data->admin_id;
+			//ADMIN ID TIENE QUE SER RECOGIDO DE TOKEN
+			try{
+				$collection->save();
+				$response[]="colección añadida";
+            }catch(\Exception $e){
+                $response = $e->getMessage();
+			}
+
+			$card = Card::where('name', $data->card)->get()->first();
+			
+			$cardCollection = new CardCollection();
+
+			if($card){
+				$cardCollection->card_id = $card->id;
+				$cardCollection->collection_id = $collection->id;
+
+				try{
+					$cardCollection->save();
+					$response[]="cardCollection añadido";
+				}catch(\Exception $e){
+					$response = $e->getMessage();
+				}
+
+			}else{
+				$card = new Card();
+				$card->name = $data->card;
+				$card->admin_id = $data->admin_id;
+				//USER ID TIENE QUE SER RECOGIDO DE TOKEN
+
+				try{
+					$card->save();
+					$response[]="carta añadida";
+				}catch(\Exception $e){
+					$response = $e->getMessage();
+				}
+
+				$cardCollection->card_id = $card->id;
+				$cardCollection->collection_id = $collection->id;
+
+				try{
+					$cardCollection->save();
+					$response[]="cardCollection añadido";
+				}catch(\Exception $e){
+					$response = $e->getMessage();
+				}
+				
+			}
+			
+		}else{
+			$response="Datos incorrectos";
+		}
+
+		return response($response);
 
 
     }

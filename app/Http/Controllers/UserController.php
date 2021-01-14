@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\Token;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -47,6 +48,7 @@ class UserController extends Controller
     public function login(Request $request){
 
         $response = "";
+        $token = new Token();
 		$data = $request->getContent();
         $data = json_decode($data);
         
@@ -56,7 +58,7 @@ class UserController extends Controller
 
             if (Hash::check($data->password, $user->password)) { 
                 $response = "Login correcto";
-                $user->api_token = Str::random(60);//Genera api token aleatorio
+                $user->api_token = $token->encode($data->username.now());
                 try{
                     $user->save();
                 }catch(\Exception $e){
@@ -101,5 +103,30 @@ class UserController extends Controller
 
         return response($response);
 
+    }
+
+    public function makeAdmin($id){
+
+        $response = "";
+        //define("ADMIN","Administrator");
+        
+        $user = User::find($id);
+
+        if($user && $user->role!==ADMIN){//COMPROBAR SI EL USER DEL TOKEN ES ADMIN
+
+            $user->role = ADMIN;
+
+            try{
+                $user->save();
+                $response = "El usuario ".$user->username." ahora es administrador";
+            }catch(\Exception $e){
+                $response = $e->getMessage();
+            }
+
+        }else{
+            $response = "No se ha encontrado dicho user o ya es administrador";
+        }
+
+        return response($response);
     }
 }

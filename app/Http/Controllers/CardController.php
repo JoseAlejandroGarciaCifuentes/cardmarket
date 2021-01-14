@@ -68,7 +68,7 @@ class CardController extends Controller
 			}else{
 				$collection = new Collection();
 				$collection->name = $data->collection;
-				$collection->user_id = $data->user_id;
+				$collection->admin_id = $data->admin_id;
 				//USER ID TIENE QUE SER RECOGIDO DE TOKEN
 
 				try{
@@ -107,21 +107,51 @@ class CardController extends Controller
 
 			$response[$i] = [
 				"Id" => $cards[$i]->id,
-				"Card Name" => $cards[$i]->name
+				"Card Name" => $cards[$i]->name,
+				"Card Description" => $cards[$i]->description
 			];
-
-			//count($cards[$j]->collection);
 
 			for ($j=0; $j <count($cards[$i]->collection) ; $j++) { 
 
 				$response[$i][$j]['Collection'] = $cards[$i]->collection[$j]->name;
-				$response[$i][$j]['Collection Description'] = $cards[$i]->collection[$j]->description;
+				$response[$i][$j]['Collection symbol'] = $cards[$i]->collection[$j]->symbol;
 			}
+
 			$response[$i]['uploaded by'] = $cards[$i]->admin->username;
 		}	
         
 		return response()->json($response);
 	}
 
+	public function editCard(Request $request, $id){
 
+        $response = "";
+
+		$card = Card::find($id);
+
+		if($card){
+
+			$data = $request->getContent();
+			$data = json_decode($data);
+
+			if($data){
+
+				$card->name = (isset($data->name) ? $data->name: $card->name);
+                $card->description = (isset($data->symbol) ? $data->symbol: $card->symbol);
+
+				try{
+					$card->save();
+					$response = "Carta editada";
+				}catch(\Exception $e){
+					$response = $e->getMessage();
+				}
+			}
+			
+		}else{
+			$response = "No existe dicha carta";
+		}
+		
+		return response($response);
+	}
+	
 }

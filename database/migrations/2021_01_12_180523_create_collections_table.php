@@ -17,7 +17,8 @@ class CreateCollectionsTable extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('symbol')->nullable();
-            $table->foreignId('user_id')->constrained();
+            $table->unsignedBigInteger('admin_id');
+            $table->foreign('admin_id')->references('id')->on('users');
             $table->date('creation_date')->nullable();
             $table->timestamps();
         });
