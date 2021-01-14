@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\CollectionController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -22,11 +24,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::prefix('users')->group(function (){
 
-	Route::post('/sign-up', [UserController::class, 'signUpUser']);
+    Route::post('/signup', [UserController::class, 'signUp']);
+    
+    Route::post('/login', [UserController::class, 'login']);
 
 	Route::post('/restorePassword', [UserController::class, 'restorePassword']);
-
-	Route::post('/register/card', [UserController::class, 'registerCard']);
 
     Route::post('/register/collection', [UserController::class, 'registerCollection']);
 
@@ -34,6 +36,16 @@ Route::prefix('users')->group(function (){
 
 Route::prefix('cards')->group(function (){
 
-    Route::get('/selling/list/{name}', [CardController::class, 'cardsByPrice']);
+    Route::get('/selling/list/{name}', [CardController::class, 'sellingsByPrice']);
+
+    Route::post('/register/card', [CardController::class, 'registerCard']);
+    
+    Route::get('/all/{name}', [CardController::class, 'cardsByName']);
+
+});
+
+Route::prefix('collections')->group(function (){
+
+    Route::post('/assign/card', [CollectionController::class, 'assignCard']);
 
 });

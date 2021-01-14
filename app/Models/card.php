@@ -10,6 +10,14 @@ class card extends Model
     use HasFactory;
 
     public function user(){
-        return $this->belongsToMany(User::class, "sellings")->withPivot('quantity','total_price')->orderBy('total_price', 'asc');
+        return $this->belongsToMany(User::class, "sellings")->withPivot('quantity','total_price')->orderBy('total_price', 'desc');
+    }
+
+    public function collection(){
+        return $this->belongsToMany(Collection::class, "card_collections");
+    }
+
+    public function admin(){
+        return $this->belongsTo(User::class);
     }
 }

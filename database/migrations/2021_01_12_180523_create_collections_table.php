@@ -15,9 +15,10 @@ class CreateCollectionsTable extends Migration
     {
         Schema::create('collections', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('symbol');
+            $table->string('name')->unique();
+            $table->string('symbol')->nullable();
             $table->foreignId('user_id')->constrained();
+            $table->date('creation_date')->nullable();
             $table->timestamps();
         });
     }
