@@ -16,6 +16,23 @@ class AuthNonAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        return $next($request);
+        define("ADMIN","Administrator");
+
+        if($request->token){
+            $user = User::where('api_token',$request->token)->first();
+
+            if($user){
+                if($user->role !== ADMIN){
+                    return $next($request);
+                }else{
+                    abort(403, "¡Solo los usuarios Individuales o Professionales pueden acceder aquí!");
+                }
+            }else{
+                abort(403, "¡Token erróneo!");
+            }
+
+        }else{
+            abort(403, "¡Token vacío!");
+        }
     }
 }

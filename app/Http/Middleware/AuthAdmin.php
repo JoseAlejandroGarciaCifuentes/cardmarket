@@ -20,7 +20,7 @@ class AuthAdmin
         define("ADMIN","Administrator");
 
         if($request->token){
-            $user = User::where('api_token',$request->token)->first();
+            $user = User::where('api_token', $request->token)->first();
 
             if($user){
                 if($user->role === ADMIN){

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Card;
 use App\Models\Collection;
 use App\Models\cardCollection;
+use App\Models\User;
 
 class CollectionController extends Controller
 {
@@ -66,20 +67,21 @@ class CollectionController extends Controller
 		return response($response);
     }
 
-    public function registerCollection(Request $request){
+    public function registerCollection(Request $request, $token){
 
         $response = [];
 		$data = $request->getContent();
 		$data = json_decode($data);
 
 		$collection = new Collection();
+		$admin = User::where('api_token', $token)->get()->first();
 		
 		if($data){
 
 			$collection->name = $data->name;
 			$collection->symbol = $data->symbol;
-			$collection->admin_id = $data->admin_id;
-			//ADMIN ID TIENE QUE SER RECOGIDO DE TOKEN
+			$collection->admin_id = $admin->id;
+
 			try{
 				$collection->save();
 				$response[]="colección añadida";
@@ -105,8 +107,7 @@ class CollectionController extends Controller
 			}else{
 				$card = new Card();
 				$card->name = $data->card;
-				$card->admin_id = $data->admin_id;
-				//USER ID TIENE QUE SER RECOGIDO DE TOKEN
+				$card->admin_id = $admin->id;
 
 				try{
 					$card->save();
@@ -132,7 +133,6 @@ class CollectionController extends Controller
 		}
 
 		return response($response);
-
 
     }
 }
