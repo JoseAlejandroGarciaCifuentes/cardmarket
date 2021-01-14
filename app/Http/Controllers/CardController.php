@@ -110,10 +110,12 @@ class CardController extends Controller
 				"Card Name" => $cards[$i]->name
 			];
 
-			for ($j=0; $j <count($cards[$j]->collection) ; $j++) { 
+			//count($cards[$j]->collection);
 
-				$response[$i]['Collection'] = $cards[$i]->collection[$j]->name;
-				$response[$i]['Collection Description'] = $cards[$i]->collection[$j]->description;
+			for ($j=0; $j <count($cards[$i]->collection) ; $j++) { 
+
+				$response[$i][$j]['Collection'] = $cards[$i]->collection[$j]->name;
+				$response[$i][$j]['Collection Description'] = $cards[$i]->collection[$j]->description;
 			}
 			$response[$i]['uploaded by'] = $cards[$i]->admin->username;
 		}	
