@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 
 use App\Http\Helpers\MyJWT;
+use \Firebase\JWT\JWT;
 
 class AuthNonAdmin
 {
@@ -19,7 +20,7 @@ class AuthNonAdmin
     public function handle(Request $request, Closure $next)
     {
         define("ADMIN","Administrator");
-        
+
         $key = MyJWT::getKey();
 
         $headers = getallheaders();

@@ -10,6 +10,7 @@ use App\Models\cardCollection;
 use App\Models\User;
 
 use \Firebase\JWT\JWT;
+use App\Http\Helpers\MyJWT;
 
 class CardController extends Controller
 {
@@ -21,16 +22,20 @@ class CardController extends Controller
 		$cards = Card::where('name','like','%'.$name.'%')->get();
 		$response = [];
 		
-		foreach ($cards as $card) {
-			foreach ($card->user as $seller) {
-				$response[] = [
-					"Card Name" => $card->name,
-					"Quantity" => $seller->pivot->quantity,
-					"Total Price" => $seller->pivot->total_price,
-					"Seller" => $seller->username
-				];
-			}	
-        } 
+		if(count($cards)>0){
+			foreach ($cards as $card) {
+				foreach ($card->user as $seller) {
+					$response[] = [
+						"Card Name" => $card->name,
+						"Quantity" => $seller->pivot->quantity,
+						"Total Price" => $seller->pivot->total_price,
+						"Seller" => $seller->username
+					];
+				}	
+			}
+		}else{
+			$response = "Ninguna carta coincide con el nombre introducido";
+		}
 
 		return response()->json($response);
 	}
@@ -64,6 +69,7 @@ class CardController extends Controller
                 $response = $e->getMessage();
 			}
 
+			
 			$collection = Collection::where('name', $data->collection)->get()->first();
 			
 			$cardCollection = new CardCollection();
@@ -102,12 +108,12 @@ class CardController extends Controller
 				}
 				
 			}
-			
+		
 		}else{
 			$response="Datos incorrectos";
 		}
 
-		return response($response);
+		return response()->json($response);
 		
 	}
 	/**
@@ -155,7 +161,7 @@ class CardController extends Controller
 			if($data){
 
 				$card->name = (isset($data->name) ? $data->name: $card->name);
-                $card->description = (isset($data->symbol) ? $data->symbol: $card->symbol);
+                $card->description = (isset($data->description) ? $data->description: $card->description);
 
 				try{
 					$card->save();

@@ -11,6 +11,8 @@ use App\Models\User;
 
 use App\Http\Helpers\MyJWT;
 
+use \Firebase\JWT\JWT;
+
 class CollectionController extends Controller
 {
 	/**
@@ -58,7 +60,7 @@ class CollectionController extends Controller
 
 				$collection->name = (isset($data->name) ? $data->name: $collection->name);
                 $collection->symbol = (isset($data->symbol) ? $data->symbol: $collection->symbol);
-                $collection->creation_date = (isset($data->creation_date) ? $data->creation_date: $soldier->creation_date);
+                $collection->creation_date = (isset($data->creation_date) ? $data->creation_date: $collection->creation_date);
 
 				try{
 					$collection->save();
@@ -79,7 +81,7 @@ class CollectionController extends Controller
 	 * Crea/registra una nueva colección además de recibir un nombre de carta que comprobará la existencia de esta
 	 * en caso de existir se asocia y en caso de que no se crea.
 	 */
-    public function registerCollection(Request $request, $token){
+    public function registerCollection(Request $request){
 
         $response = [];
 		$data = $request->getContent();

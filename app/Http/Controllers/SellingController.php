@@ -8,6 +8,8 @@ use App\Models\Selling;
 
 use App\Http\Helpers\MyJWT;
 
+use \Firebase\JWT\JWT;
+
 class SellingController extends Controller
 {
 	/**
