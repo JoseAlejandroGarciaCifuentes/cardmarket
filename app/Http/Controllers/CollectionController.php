@@ -97,6 +97,7 @@ class CollectionController extends Controller
 
 			$collection->name = $data->name;
 			$collection->symbol = $data->symbol;
+			$collection->creation_date = $data->creation_date;
 			$collection->admin_id = $decoded->id;
 
 			try{
