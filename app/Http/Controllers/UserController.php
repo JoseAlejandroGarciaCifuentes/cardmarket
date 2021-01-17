@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Hash;
-use App\Helpers\Token;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
+use \Firebase\JWT\JWT;
+
 use App\Models\User;
+use App\Http\Helpers\MyJWT;
 
 class UserController extends Controller
 {
+    /**
+     * Registra un usuario en base al body recibido
+     */
     public function signUp(Request $request){
 
         $response = "";
@@ -44,28 +49,35 @@ class UserController extends Controller
         return response($response);
         
     }
-
+    /**
+     * Comprueba user y password con la base de datos, genera un token que contiene el id y el rol este se
+     * guarda en la bbdd asociado a dicho user
+     */
     public function login(Request $request){
 
         $response = "";
-        $token = new Token();
 		$data = $request->getContent();
         $data = json_decode($data);
         
         $user = User::where('username', $data->username)->get()->first();
+
+        $payload = MyJWT::generatePayload($user);
+        $key = MyJWT::getKey();
+
+        $jwt = JWT::encode($payload, $key);
         
 		if($data){
 
             if (Hash::check($data->password, $user->password)) { 
+
                 $response = "Login correcto";
-                $user->api_token = $token->encode($data->username.now());
+                $user->api_token = $jwt;
+
                 try{
                     $user->save();
                 }catch(\Exception $e){
                     $response = $e->getMessage();
                 }
-
-                //AQUI TIENE QUE PASAR ALGO CON EL TOKEN ¿?
 
             }else{
                 $response = "Usuario o contraseña no coinciden";
@@ -76,7 +88,9 @@ class UserController extends Controller
         return response($response);
 
     }
-
+    /**
+     * Resetea la constraseña, genera una nueva aleatoria, la guarda en la bbdd y la devuelve en el response
+     */
     public function restorePassword(Request $request){
 
         $response = "";
@@ -105,10 +119,12 @@ class UserController extends Controller
 
     }
 
+    /**
+     * Si el que hace la llamada está logged como Admin podrá hacer admin a otro usuario con este método.
+     */
     public function makeAdmin($id){
 
         $response = "";
-        //define("ADMIN","Administrator");
         
         $user = User::find($id);
 

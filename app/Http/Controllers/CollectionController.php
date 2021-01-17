@@ -9,8 +9,13 @@ use App\Models\Collection;
 use App\Models\cardCollection;
 use App\Models\User;
 
+use App\Http\Helpers\MyJWT;
+
 class CollectionController extends Controller
 {
+	/**
+	 * Asigna una carta a una colección
+	 */
     public function assignCard(Request $request){
 
         $response = [];
@@ -35,6 +40,9 @@ class CollectionController extends Controller
         return response($response);
     }
 
+	/**
+	 * Edita/actualiza una colección
+	 */
     public function editCollection(Request $request, $id){
 
         $response = "";
@@ -67,20 +75,27 @@ class CollectionController extends Controller
 		return response($response);
     }
 
+	/**
+	 * Crea/registra una nueva colección además de recibir un nombre de carta que comprobará la existencia de esta
+	 * en caso de existir se asocia y en caso de que no se crea.
+	 */
     public function registerCollection(Request $request, $token){
 
         $response = [];
 		$data = $request->getContent();
 		$data = json_decode($data);
 
+		$key = MyJWT::getKey();
+		$headers = getallheaders();
+		$decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
+
 		$collection = new Collection();
-		$admin = User::where('api_token', $token)->get()->first();
 		
 		if($data){
 
 			$collection->name = $data->name;
 			$collection->symbol = $data->symbol;
-			$collection->admin_id = $admin->id;
+			$collection->admin_id = $decoded->id;
 
 			try{
 				$collection->save();
@@ -107,7 +122,7 @@ class CollectionController extends Controller
 			}else{
 				$card = new Card();
 				$card->name = $data->card;
-				$card->admin_id = $admin->id;
+				$card->admin_id = $decoded->id;
 
 				try{
 					$card->save();

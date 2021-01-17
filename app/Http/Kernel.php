@@ -4,6 +4,10 @@ namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
+use App\Http\Middleware\AuthAdmin;
+use App\Http\Middleware\AuthNonAdmin;
+
+
 class Kernel extends HttpKernel
 {
     /**
@@ -62,5 +66,7 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'AuthAdmin' => AuthAdmin::class,
+        'AuthNonAdmin' => AuthNonAdmin::class,
     ];
 }

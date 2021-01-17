@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
+use App\Http\Helpers\MyJWT;
+
 class AuthNonAdmin
 {
     /**
@@ -17,18 +19,19 @@ class AuthNonAdmin
     public function handle(Request $request, Closure $next)
     {
         define("ADMIN","Administrator");
+        
+        $key = MyJWT::getKey();
 
-        if($request->token){
-            $user = User::where('api_token',$request->token)->first();
+        $headers = getallheaders();
 
-            if($user){
-                if($user->role !== ADMIN){
-                    return $next($request);
-                }else{
-                    abort(403, "¡Solo los usuarios Individuales o Professionales pueden acceder aquí!");
-                }
+        $decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
+
+        if($decoded){
+
+            if($decoded->role !== ADMIN){
+                return $next($request);
             }else{
-                abort(403, "¡Token erróneo!");
+                abort(403, "¡Usted no está permitido aquí!");
             }
 
         }else{

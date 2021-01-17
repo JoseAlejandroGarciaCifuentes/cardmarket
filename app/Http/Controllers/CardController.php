@@ -9,8 +9,13 @@ use App\Models\Collection;
 use App\Models\cardCollection;
 use App\Models\User;
 
+use \Firebase\JWT\JWT;
+
 class CardController extends Controller
 {
+	/**
+	 * Devuelve las cartas en venta ordenadas por precio y nombre
+	 */
     public function sellingsByPrice($name){
 
 		$cards = Card::where('name','like','%'.$name.'%')->get();
@@ -30,23 +35,27 @@ class CardController extends Controller
 		return response()->json($response);
 	}
 
-	//Arreglar token
-	public function registerCard(Request $request, $token){
+	/**
+	 * Crea/registra una nueva carta además de recibir un nombre de colección que comprobará la existencia de esta
+	 * en caso de existir se asocia y en caso de que no se crea.
+	 */
+	public function registerCard(Request $request){
 
 		$response = [];
 		$data = $request->getContent();
 		$data = json_decode($data);
+
+		$key = MyJWT::getKey();
+		$headers = getallheaders();
+		$decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
 		
-		$admin = User::where('api_token', $token)->get()->first();
 		$card = new Card();
 
-		//$response = $admin->id;
-		
 		if($data){
 
 			$card->name = $data->name;
 			$card->description = $data->description;
-			$card->admin_id = $admin->id;
+			$card->admin_id = $decoded->id;
 
 			try{
 				$card->save();
@@ -73,7 +82,7 @@ class CardController extends Controller
 			}else{
 				$collection = new Collection();
 				$collection->name = $data->collection;
-				$collection->admin_id = $admin->id;
+				$collection->admin_id = $decoded->id;
 
 				try{
 					$collection->save();
@@ -101,7 +110,9 @@ class CardController extends Controller
 		return response($response);
 		
 	}
-
+	/**
+	 * Devuelve las cartas en venta ordenadas por nombre
+	 */
 	public function cardsByName($name){
 
 		$cards = Card::where('name','like','%'.$name.'%')->get();
@@ -127,6 +138,9 @@ class CardController extends Controller
 		return response()->json($response);
 	}
 
+	/**
+	 * Permite editar una carta
+	 */
 	public function editCard(Request $request, $id){
 
         $response = "";
