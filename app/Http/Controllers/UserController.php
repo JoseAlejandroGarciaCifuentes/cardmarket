@@ -45,8 +45,11 @@ class UserController extends Controller
 		}else{
 			$response = "No has introducido un usuario válido";
 		}
+        //added for testing
+        $response = $user;
+        
 
-        return response($response);
+        return response()->json($response, 201);
         
     }
     /**
