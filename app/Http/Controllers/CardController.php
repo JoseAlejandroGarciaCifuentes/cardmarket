@@ -56,7 +56,7 @@ class CardController extends Controller
 		
 		$card = new Card();
 
-		if($data){
+		if(isset($data->name) && isset($data->description) && isset($data->collection)){
 
 			$card->name = $data->name;
 			$card->description = $data->description;
@@ -64,12 +64,11 @@ class CardController extends Controller
 
 			try{
 				$card->save();
-				$response[]="carta añadido";
+				$response[]="carta añadida";
             }catch(\Exception $e){
                 $response = $e->getMessage();
 			}
 
-			
 			$collection = Collection::where('name', $data->collection)->get()->first();
 			
 			$cardCollection = new CardCollection();
@@ -123,24 +122,29 @@ class CardController extends Controller
 
 		$cards = Card::where('name','like','%'.$name.'%')->get();
 		$response = [];
+
+		if(!$cards->isEmpty()){
 		
-		for ($i=0; $i <count($cards) ; $i++) { 
+			for ($i=0; $i <count($cards) ; $i++) { 
 
-			$response[$i] = [
-				"Id" => $cards[$i]->id,
-				"Card Name" => $cards[$i]->name,
-				"Card Description" => $cards[$i]->description
-			];
+				$response[$i] = [
+					"Id" => $cards[$i]->id,
+					"Card Name" => $cards[$i]->name,
+					"Card Description" => $cards[$i]->description
+				];
+				
+				for ($j=0; $j <count($cards[$i]->collection); $j++) { 
 
-			for ($j=0; $j <count($cards[$i]->collection) ; $j++) { 
+					$response[$i][$j]['Collection'] = $cards[$i]->collection[$j]->name;
+					$response[$i][$j]['Collection symbol'] = $cards[$i]->collection[$j]->symbol;
 
-				$response[$i][$j]['Collection'] = $cards[$i]->collection[$j]->name;
-				$response[$i][$j]['Collection symbol'] = $cards[$i]->collection[$j]->symbol;
-			}
-
-			$response[$i]['uploaded by'] = $cards[$i]->admin->username;
-		}	
-        
+				}
+				
+				$response[$i]['uploaded by'] = $cards[$i]->admin->username;
+			}	
+		}else{
+			$response = "No cards";
+		}
 		return response()->json($response);
 	}
 
@@ -149,33 +153,42 @@ class CardController extends Controller
 	 */
 	public function editCard(Request $request, $id){
 
-        $response = "";
+		$response = [];
+		
+		$data = $request->getContent();
+		$data = json_decode($data);
 
-		$card = Card::find($id);
+		if($data){
 
-		if($card){
+			$card = Card::find($id);
+			$response[] = "El JSON pasado es correcto";
 
-			$data = $request->getContent();
-			$data = json_decode($data);
-
-			if($data){
+			if($card){
 
 				$card->name = (isset($data->name) ? $data->name: $card->name);
                 $card->description = (isset($data->description) ? $data->description: $card->description);
-
+				$response[] ="La carta existe";
 				try{
+
 					$card->save();
-					$response = "Carta editada";
+					$response[] = "La carta se ha guardado";
+					//$response = "Carta editada";
+
 				}catch(\Exception $e){
-					$response = $e->getMessage();
+
+					$response[] = $e->getMessage();
 				}
+			}else{
+				$response[] = "No existe dicha carta";
+				//$response = "No existe dicha carta";
 			}
 			
 		}else{
-			$response = "No existe dicha carta";
+			$response[] = $response;
+			//$response = "JSON invalid";
 		}
 		
-		return response($response);
+		return response()->json($response);
 	}
 	
 }

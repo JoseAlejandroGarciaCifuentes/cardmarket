@@ -46,10 +46,10 @@ class UserController extends Controller
 			$response = "No has introducido un usuario válido";
 		}
         //added for testing
-        $response = $user;
+        //$response = $user;
         
 
-        return response()->json($response, 201);
+        return response()->json($response);
         
     }
     /**
@@ -73,8 +73,7 @@ class UserController extends Controller
 
             if (Hash::check($data->password, $user->password)) { 
 
-                $response = "Login correcto";
-                $user->api_token = $jwt;
+                $response = $jwt;
 
                 try{
                     $user->save();
