@@ -28,7 +28,7 @@ class UserTest extends TestCase
     ];
 
         $this->json('post', 'api/users/signup', $payload)
-         ->assertStatus(Response::HTTP_CREATED)
+         ->assertStatus(200)
          ->assertJsonStructure(
              [
                   

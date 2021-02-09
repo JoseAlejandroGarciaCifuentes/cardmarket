@@ -168,11 +168,11 @@ class CardController extends Controller
 				$card->name = (isset($data->name) ? $data->name: $card->name);
                 $card->description = (isset($data->description) ? $data->description: $card->description);
 				$response[] ="La carta existe";
+				
 				try{
 
 					$card->save();
 					$response[] = "La carta se ha guardado";
-					//$response = "Carta editada";
 
 				}catch(\Exception $e){
 
@@ -180,12 +180,9 @@ class CardController extends Controller
 				}
 			}else{
 				$response[] = "No existe dicha carta";
-				//$response = "No existe dicha carta";
 			}
-			
 		}else{
-			$response[] = $response;
-			//$response = "JSON invalid";
+			$response[] = "JSON inválido";
 		}
 		
 		return response()->json($response);
