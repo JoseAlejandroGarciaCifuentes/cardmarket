@@ -118,7 +118,7 @@ class CardController extends Controller
 	/**
 	 * Devuelve las cartas en venta ordenadas por nombre
 	 */
-	public function cardsByName($name){
+	/*public function cardsByName($name){
 
 		$cards = Card::where('name','like','%'.$name.'%')->get();
 		$response = [];
@@ -128,20 +128,51 @@ class CardController extends Controller
 			for ($i=0; $i <count($cards) ; $i++) { 
 
 				$response[$i] = [
-					"Id" => $cards[$i]->id,
-					"Card Name" => $cards[$i]->name,
-					"Card Description" => $cards[$i]->description
+					"id" => $cards[$i]->id,
+					"name" => $cards[$i]->name,
+					"description" => $cards[$i]->description
 				];
 				
 				for ($j=0; $j <count($cards[$i]->collection); $j++) { 
 
-					$response[$i][$j]['Collection'] = $cards[$i]->collection[$j]->name;
-					$response[$i][$j]['Collection symbol'] = $cards[$i]->collection[$j]->symbol;
+					$response[$i][$j]['collection'] = $cards[$i]->collection[$j]->name;
+					$response[$i][$j]['collectionSymbol'] = $cards[$i]->collection[$j]->symbol;
 
 				}
 				
-				$response[$i]['uploaded by'] = $cards[$i]->admin->username;
+				$response[$i]['userWhoPostedIt'] = $cards[$i]->admin->username;
 			}	
+		}else{
+			$response = "No cards";
+		}
+		return response()->json($response);
+	}*/
+
+	/**
+	 * Devuelve las cartas en venta ordenadas por nombre
+	 */
+	public function cardsByName($name){
+
+		$card = Card::where('name','like','%'.$name.'%')->get()->first();
+		$response = [];
+
+		if(!empty($card)){
+		
+			$response = [
+				"id" => $card->id,
+				"name" => $card->name,
+				"description" => $card->description
+			];
+			
+			for ($i=0; $i <count($card->collection); $j++) { 
+
+				$response[$i][$j]['collection'] = $card->collection[$i]->name;
+				$response[$i][$j]['collectionSymbol'] = $card->collection[$i]->symbol;
+
+			}
+			
+			$response['userWhoPostedIt'] = $card->admin->username;
+			
 		}else{
 			$response = "No cards";
 		}
@@ -185,6 +216,39 @@ class CardController extends Controller
 			$response[] = "JSON inválido";
 		}
 		
+		return response()->json($response);
+	}
+
+	/**
+	 * Devuelve las cartas en venta ordenadas por nombre
+	 */
+	public function getCards(){
+
+		$cards = Card::all();
+		$response = [];
+
+		if(!$cards->isEmpty()){
+		
+			for ($i=0; $i <count($cards) ; $i++) { 
+
+				$response[$i] = [
+					"id" => $cards[$i]->id,
+					"name" => $cards[$i]->name,
+					"description" => $cards[$i]->description
+				];
+				
+				for ($j=0; $j <count($cards[$i]->collection); $j++) { 
+
+					$response[$i][$j]['collection'] = $cards[$i]->collection[$j]->name;
+					$response[$i][$j]['collectionSymbol'] = $cards[$i]->collection[$j]->symbol;
+
+				}
+				
+				$response[$i]['userWhoPostedIt'] = $cards[$i]->admin->username;
+			}	
+		}else{
+			$response = "No cards";
+		}
 		return response()->json($response);
 	}
 	

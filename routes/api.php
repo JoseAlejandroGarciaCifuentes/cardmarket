@@ -39,10 +39,12 @@ Route::prefix('cards')->group(function (){
 
     Route::post('/edit/{id}', [CardController::class, 'editCard'])->middleware('AuthAdmin');
     
-    Route::get('/all/{name}', [CardController::class, 'cardsByName'])->middleware('AuthNonAdmin');
+    Route::get('/all/{name}', [CardController::class, 'cardsByName']);//->middleware('AuthNonAdmin');
 
     Route::get('/selling/list/{name}', [CardController::class, 'sellingsByPrice']);
 
+    Route::get('/all', [CardController::class, 'getCards']);//->middleware('AuthNonAdmin');
+    
 });
 
 Route::prefix('collections')->group(function (){
