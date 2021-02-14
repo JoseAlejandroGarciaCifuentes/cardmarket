@@ -63,31 +63,33 @@ class UserController extends Controller
         $data = json_decode($data);
         
         $user = User::where('username', $data->username)->get()->first();
+        if(!empty($user)){
+            $payload = MyJWT::generatePayload($user);
+            $key = MyJWT::getKey();
 
-        $payload = MyJWT::generatePayload($user);
-        $key = MyJWT::getKey();
+            $jwt = JWT::encode($payload, $key);
+            
+            if($data){
 
-        $jwt = JWT::encode($payload, $key);
-        
-		if($data){
+                if (Hash::check($data->password, $user->password)) { 
 
-            if (Hash::check($data->password, $user->password)) { 
+                    $response = $jwt;
 
-                $response = $jwt;
+                    try{
+                        $user->save();
+                    }catch(\Exception $e){
+                        $response = $e->getMessage();
+                    }
 
-                try{
-                    $user->save();
-                }catch(\Exception $e){
-                    $response = $e->getMessage();
+                }else{
+                    $response = "600";
                 }
-
-            }else{
-                $response = "Usuario o contraseña no coinciden";
             }
-
+        }else{
+            $response = "700";
         }
 
-        return response($response);
+        return response()->json($response);
 
     }
     /**
