@@ -153,4 +153,36 @@ class CollectionController extends Controller
 		return response($response);
 
     }
+
+	/**
+	 * Devuelve las cartas en venta ordenadas por nombre
+	 */
+	public function getCollections(){
+
+		$collections = Collection::all();
+		$response = [];
+
+		if(!$collections->isEmpty()){
+		
+			for ($i=0; $i <count($collections) ; $i++) { 
+
+				$response[$i] = [
+					"name" => $collections[$i]->name,
+					"symbol" => $collections[$i]->symbol,
+					"creation_date" => $collections[$i]->creation_date
+				];
+				
+				/*for ($j=0; $j <count($collections[$i]->card); $j++) { 
+
+					$response[$i][$j]['cards'] = $collections[$i]->card[$j]->name;
+					
+				}*/
+				
+				//$response[$i]['userWhoPostedIt'] = $collections[$i]->admin->username;
+			}	
+		}else{
+			$response = "No collections";
+		}
+		return response()->json($response);
+	}
 }

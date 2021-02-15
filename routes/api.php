@@ -55,6 +55,8 @@ Route::prefix('collections')->group(function (){
 
     Route::post('/assign/card', [CollectionController::class, 'assignCard'])->middleware('AuthAdmin');
 
+    Route::get('/all', [CollectionController::class, 'getCollections']);//->middleware('AuthAdmin');
+
 });
 
 Route::prefix('sellings')->group(function (){

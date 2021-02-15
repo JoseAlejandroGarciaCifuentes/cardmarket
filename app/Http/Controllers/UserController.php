@@ -75,12 +75,6 @@ class UserController extends Controller
 
                     $response = $jwt;
 
-                    try{
-                        $user->save();
-                    }catch(\Exception $e){
-                        $response = $e->getMessage();
-                    }
-
                 }else{
                     $response = "600";
                 }

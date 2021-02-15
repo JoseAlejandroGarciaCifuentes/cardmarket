@@ -166,8 +166,8 @@ class CardController extends Controller
 			
 			for ($i=0; $i <count($card->collection); $j++) { 
 
-				$response[$i][$j]['collection'] = $card->collection[$i]->name;
-				$response[$i][$j]['collectionSymbol'] = $card->collection[$i]->symbol;
+				$response[$i][$j]['name'] = $card->collection[$i]->name;
+				$response[$i][$j]['symbol'] = $card->collection[$i]->symbol;
 
 			}
 			
