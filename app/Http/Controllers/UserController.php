@@ -61,15 +61,15 @@ class UserController extends Controller
         $response = "";
 		$data = $request->getContent();
         $data = json_decode($data);
-        
-        $user = User::where('username', $data->username)->get()->first();
-        if(!empty($user)){
-            $payload = MyJWT::generatePayload($user);
-            $key = MyJWT::getKey();
+        if($data){
+            $user = User::where('username', $data->username)->get()->first();
+            if(!empty($user)){
+                $payload = MyJWT::generatePayload($user);
+                $key = MyJWT::getKey();
 
-            $jwt = JWT::encode($payload, $key);
+                $jwt = JWT::encode($payload, $key);
+                
             
-            if($data){
 
                 if (Hash::check($data->password, $user->password)) { 
 
