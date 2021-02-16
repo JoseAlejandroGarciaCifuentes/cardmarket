@@ -13,6 +13,7 @@ use App\Http\Helpers\MyJWT;
 
 class UserController extends Controller
 {
+    
     /**
      * Registra un usuario en base al body recibido
      */
