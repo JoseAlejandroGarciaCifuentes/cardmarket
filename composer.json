@@ -14,6 +14,7 @@
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.12",
+        "laravel/socialite": "^5.1",
         "laravel/tinker": "^2.5",
         "mvccore/ext-debug-tracy-all": "^5.0",
         "phpunit/php-code-coverage": "^9.2"
