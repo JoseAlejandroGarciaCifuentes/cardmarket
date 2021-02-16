@@ -25,9 +25,11 @@ class AuthNonAdmin
 
         $headers = getallheaders();
         
-        if(array_key_exists('api_token', $headers)){
-
-            $decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
+        if(array_key_exists('Authorization', $headers)){
+            $separating_bearer = explode(" ", $headers['Authorization']);
+            $token = $separating_bearer[1];
+            
+            $decoded = JWT::decode($token, $key, array('HS256'));
 
             if($decoded){
 

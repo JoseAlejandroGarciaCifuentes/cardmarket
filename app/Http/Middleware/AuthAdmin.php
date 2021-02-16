@@ -26,10 +26,12 @@ class AuthAdmin
 
         $headers = getallheaders();
 
-        if(array_key_exists('api_token', $headers)){
+        if(array_key_exists('Authorization', $headers)){
 
-            if(!empty($headers['api_token'])){
-                $decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
+            if(!empty($headers['Authorization'])){
+                $separating_bearer = explode(" ", $headers['Authorization']);
+                $token = $separating_bearer[1];
+                $decoded = JWT::decode($token, $key, array('HS256'));
                 
                 if(isset($decoded->role)){
                     if($decoded->role === ADMIN){

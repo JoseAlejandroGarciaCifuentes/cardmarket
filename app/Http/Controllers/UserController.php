@@ -113,7 +113,7 @@ class UserController extends Controller
             $response = "Datos erroneos";
         }
 
-        return response($response);
+        return response()->json($response);
 
     }
 
@@ -141,6 +141,6 @@ class UserController extends Controller
             $response = "No se ha encontrado dicho user o ya es administrador";
         }
 
-        return response($response);
+        return response()->json($response);
     }
 }

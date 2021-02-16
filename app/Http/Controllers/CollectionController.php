@@ -89,7 +89,9 @@ class CollectionController extends Controller
 
 		$key = MyJWT::getKey();
 		$headers = getallheaders();
-		$decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
+		$separating_bearer = explode(" ", $headers['Authorization']);
+		$token = $separating_bearer[1];
+		$decoded = JWT::decode($token, $key, array('HS256'));
 
 		$collection = new Collection();
 		
@@ -150,7 +152,7 @@ class CollectionController extends Controller
 			$response="Datos incorrectos";
 		}
 
-		return response($response);
+		return response()->json($response);
 
     }
 
@@ -178,7 +180,7 @@ class CollectionController extends Controller
 					
 				}*/
 				
-				//$response[$i]['userWhoPostedIt'] = $collections[$i]->admin->username;
+				$response[$i]['userWhoPostedIt'] = $collections[$i]->admin->username;
 			}	
 		}else{
 			$response = "No collections";

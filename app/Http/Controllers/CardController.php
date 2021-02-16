@@ -52,11 +52,13 @@ class CardController extends Controller
 
 		$key = MyJWT::getKey();
 		$headers = getallheaders();
-		$decoded = JWT::decode($headers['api_token'], $key, array('HS256'));
+		$separating_bearer = explode(" ", $headers['Authorization']);
+                $token = $separating_bearer[1];
+                $decoded = JWT::decode($token, $key, array('HS256'));
 		
 		$card = new Card();
 
-		if(isset($data->name) && isset($data->description) && isset($data->collection)){
+		if(isset($data->name) && isset($data->description)){
 
 			$card->name = $data->name;
 			$card->description = $data->description;
@@ -68,46 +70,6 @@ class CardController extends Controller
             }catch(\Exception $e){
                 $response = $e->getMessage();
 			}
-
-			$collection = Collection::where('name', $data->collection)->get()->first();
-			
-			$cardCollection = new CardCollection();
-
-			if($collection){
-				$cardCollection->card_id = $card->id;
-				$cardCollection->collection_id = $collection->id;
-
-				try{
-					$cardCollection->save();
-					$response[]="cardCollection añadido";
-				}catch(\Exception $e){
-					$response = $e->getMessage();
-				}
-
-			}else{
-				$collection = new Collection();
-				$collection->name = $data->collection;
-				$collection->admin_id = $decoded->id;
-
-				try{
-					$collection->save();
-					$response[]="cardCollection añadido, nueva colección";
-				}catch(\Exception $e){
-					$response = $e->getMessage();
-				}
-
-				$cardCollection->card_id = $card->id;
-				$cardCollection->collection_id = $collection->id;
-
-				try{
-					$cardCollection->save();
-					$response[]="cardCollection añadido, nueva colección";
-				}catch(\Exception $e){
-					$response = $e->getMessage();
-				}
-				
-			}
-		
 		}else{
 			$response="Datos incorrectos";
 		}
@@ -155,7 +117,8 @@ class CardController extends Controller
 
 		$card = Card::where('name','like','%'.$name.'%')->get()->first();
 		$response = [];
-
+		$headers = getallheaders();
+		//print_r($headers['Authorization']);
 		if(!empty($card)){
 		
 			$response = [
@@ -249,6 +212,7 @@ class CardController extends Controller
 		}else{
 			$response = "No cards";
 		}
+		
 		return response()->json($response);
 	}
 	
