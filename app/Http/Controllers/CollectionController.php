@@ -24,20 +24,30 @@ class CollectionController extends Controller
 		$data = $request->getContent();
 		$data = json_decode($data);
 		
-        if($data&&Card::find($data->card)&&Collection::find($data->collection)){
+		if($data){
+			if(isset($data->card)&&isset($data->collection)){
+				if(Card::find($data->card)&&Collection::find($data->collection)){
 
-            $cardCollection = new CardCollection();
-            $cardCollection->card_id = $data->card;
-            $cardCollection->collection_id = $data->collection;
+					$cardCollection = new CardCollection();
+					$cardCollection->card_id = $data->card;
+					$cardCollection->collection_id = $data->collection;
 
-            try{
-                $cardCollection->save();
-                $response = "OK";
-            }catch(\Exception $e){
-                $response = $e->getMessage();
-            }
+					try{
+						$cardCollection->save();
+						$response = "OK";
+					}catch(\Exception $e){
+						$response = $e->getMessage();
+					}
 
-        }
+				}else{
+					$response = "carta o coleccion no encontrada";
+				}
+			}else{
+				$response = "params invalidos";
+			}
+		}else{
+			$response = "json invalido";
+		}
 
         return response($response);
     }
@@ -74,7 +84,7 @@ class CollectionController extends Controller
 			$response = "No existe dicha colección";
 		}
 		
-		return response($response);
+		return response()->json($response);
     }
 
 	/**
@@ -96,60 +106,68 @@ class CollectionController extends Controller
 		$collection = new Collection();
 		
 		if($data){
+			if(isset($data->name)&&isset($data->symbol)&&isset($data->creation_date)&&isset($data->card)){
 
-			$collection->name = $data->name;
-			$collection->symbol = $data->symbol;
-			$collection->creation_date = $data->creation_date;
-			$collection->admin_id = $decoded->id;
+				if(Collection::where('name', $data->name)->get()->first()){
 
-			try{
-				$collection->save();
-				$response[]="colección añadida";
-            }catch(\Exception $e){
-                $response = $e->getMessage();
-			}
+					$collection->name = $data->name;
+					$collection->symbol = $data->symbol;
+					$collection->creation_date = $data->creation_date;
+					$collection->admin_id = $decoded->id;
 
-			$card = Card::where('name', $data->card)->get()->first();
-			
-			$cardCollection = new CardCollection();
+					try{
+						$collection->save();
+						$response[]="colección añadida";
+					}catch(\Exception $e){
+						$response = $e->getMessage();
+					}
 
-			if($card){
-				$cardCollection->card_id = $card->id;
-				$cardCollection->collection_id = $collection->id;
+					$card = Card::where('name', $data->card)->get()->first();
+					
+					$cardCollection = new CardCollection();
 
-				try{
-					$cardCollection->save();
-					$response[]="cardCollection añadido";
-				}catch(\Exception $e){
-					$response = $e->getMessage();
+					if($card){
+						$cardCollection->card_id = $card->id;
+						$cardCollection->collection_id = $collection->id;
+
+						try{
+							$cardCollection->save();
+							$response[]="cardCollection añadido";
+						}catch(\Exception $e){
+							$response = $e->getMessage();
+						}
+
+					}else{
+						$card = new Card();
+						$card->name = $data->card;
+						$card->admin_id = $decoded->id;
+
+						try{
+							$card->save();
+							$response[]="carta añadida";
+						}catch(\Exception $e){
+							$response = $e->getMessage();
+						}
+
+						$cardCollection->card_id = $card->id;
+						$cardCollection->collection_id = $collection->id;
+
+						try{
+							$cardCollection->save();
+							$response[]="cardCollection añadido";
+						}catch(\Exception $e){
+							$response = $e->getMessage();
+						}
+					}
+				}else{
+					$response = "nombre de coleccion ya existe";	
 				}
-
 			}else{
-				$card = new Card();
-				$card->name = $data->card;
-				$card->admin_id = $decoded->id;
-
-				try{
-					$card->save();
-					$response[]="carta añadida";
-				}catch(\Exception $e){
-					$response = $e->getMessage();
-				}
-
-				$cardCollection->card_id = $card->id;
-				$cardCollection->collection_id = $collection->id;
-
-				try{
-					$cardCollection->save();
-					$response[]="cardCollection añadido";
-				}catch(\Exception $e){
-					$response = $e->getMessage();
-				}
-				
+				$response = "params incorrectos";
 			}
 			
 		}else{
-			$response="Datos incorrectos";
+			$response="json incorrectos";
 		}
 
 		return response()->json($response);
@@ -182,9 +200,8 @@ class CollectionController extends Controller
 				
 				$response[$i]['userWhoPostedIt'] = $collections[$i]->admin->username;
 			}	
-		}else{
-			$response = "No collections";
 		}
+
 		return response()->json($response);
 	}
 }

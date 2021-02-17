@@ -24,31 +24,37 @@ class UserController extends Controller
         $data = json_decode($data);
         
 		if($data){
+            if(isset($data->username)&&isset($data->email)&&isset($data->password)&&isset($data->role)){
 
-            if($data->role !== "Administrator"){
-                $user = new User();
+                if(User::where('username', $data->username)->get()->first()&&!User::where('email', $data->email)->get()->first()){
 
-                $user->username = $data->username;
-                $user->email = $data->email;
-                $user->password = Hash::make($data->password);
-                $user->role = $data->role;
-            
-                try{
-                    $user->save();
-                    $response = "Añadido!";
-                }catch(\Exception $e){
-                    $response = $e->getMessage();
+                    if($data->role !== "Administrator"){
+
+                        $user = new User();
+
+                        $user->username = $data->username;
+                        $user->email = $data->email;
+                        $user->password = Hash::make($data->password);
+                        $user->role = $data->role;
+                    
+                        try{
+                            $user->save();
+                            $response = "Añadido!";
+                        }catch(\Exception $e){
+                            $response = $e->getMessage();
+                        }
+                    }else{
+                        $response = "params invalidos";
+                    }
+                }else{
+                    $response = "username o email cogido";
                 }
             }else{
                 $response = "Tu cuenta no ha sido creada, no puedes ponerte rol de Admin, prueba 'Individual' o 'Professional'";
             }
-
 		}else{
 			$response = "No has introducido un usuario válido";
 		}
-        //added for testing
-        //$response = $user;
-        
 
         return response()->json($response);
         
@@ -62,26 +68,32 @@ class UserController extends Controller
         $response = "";
 		$data = $request->getContent();
         $data = json_decode($data);
+
         if($data){
-            $user = User::where('username', $data->username)->get()->first();
-            if(!empty($user)){
-                $payload = MyJWT::generatePayload($user);
-                $key = MyJWT::getKey();
+            if(isset($data->username) && isset($data->password)){
+                $user = User::where('username', $data->username)->get()->first();
+                if($user){
 
-                $jwt = JWT::encode($payload, $key);
-                
-            
+                    $payload = MyJWT::generatePayload($user);
+                    $key = MyJWT::getKey();
 
-                if (Hash::check($data->password, $user->password)) { 
+                    $jwt = JWT::encode($payload, $key);
+                    
+                    if (Hash::check($data->password, $user->password)) { 
 
-                    $response = $jwt;
+                        $response = $jwt;
 
+                    }else{
+                        $response = "password no coincide";
+                    }
                 }else{
-                    $response = "600";
+                    $response = "user no existe";
                 }
+            }else{
+                $response = "params invalidos";    
             }
         }else{
-            $response = "700";
+            $response = "json incorrecto";
         }
 
         return response()->json($response);
@@ -96,22 +108,28 @@ class UserController extends Controller
 		$data = $request->getContent();
         $data = json_decode($data);
 
-        $user = User::where('email', $data->email)->get()->first();
-
         if($data){
+            if(isset($data->email)){
+                $user = User::where('email', $data->email)->get()->first();
+                if($user){
+                    $newRandomPassword = Str::random(60);
+                    $user->password = Hash::make($newRandomPassword);
 
-            $newRandomPassword = Str::random(60);
-            $user->password = Hash::make($newRandomPassword);
+                    $response = $newRandomPassword;
 
-            $response = $newRandomPassword;
-
-            try{
-                $user->save();
-            }catch(\Exception $e){
-                $response = $e->getMessage();
+                    try{
+                        $user->save();
+                    }catch(\Exception $e){
+                        $response = $e->getMessage();
+                    }
+                }else{
+                    $response = "email no corresponde a ningun user";
+                }
+            }else{
+                $response = "params invalidos"; 
             }
         }else{
-            $response = "Datos erroneos";
+            $response = "json invalido";
         }
 
         return response()->json($response);
@@ -127,7 +145,7 @@ class UserController extends Controller
         
         $user = User::find($id);
 
-        if($user && $user->role!==ADMIN){//COMPROBAR SI EL USER DEL TOKEN ES ADMIN
+        if($user && $user->role!==ADMIN){
 
             $user->role = ADMIN;
 

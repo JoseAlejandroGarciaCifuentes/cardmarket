@@ -22,7 +22,7 @@ class CardController extends Controller
 		$cards = Card::where('name','like','%'.$name.'%')->get();
 		$response = [];
 		
-		if(count($cards)>0){
+		if($cards->isEmpty()){
 			foreach ($cards as $card) {
 				foreach ($card->user as $seller) {
 					$response[] = [
@@ -31,10 +31,8 @@ class CardController extends Controller
 						"Total Price" => $seller->pivot->total_price,
 						"Seller" => $seller->username
 					];
-				}	
+				}
 			}
-		}else{
-			$response = "Ninguna carta coincide con el nombre introducido";
 		}
 
 		return response()->json($response);
@@ -50,65 +48,39 @@ class CardController extends Controller
 		$data = $request->getContent();
 		$data = json_decode($data);
 
-		$key = MyJWT::getKey();
-		$headers = getallheaders();
-		$separating_bearer = explode(" ", $headers['Authorization']);
-                $token = $separating_bearer[1];
-                $decoded = JWT::decode($token, $key, array('HS256'));
-		
-		$card = new Card();
+		if($data){
 
-		if(isset($data->name) && isset($data->description)){
+			$key = MyJWT::getKey();
+			$headers = getallheaders();
+			$separating_bearer = explode(" ", $headers['Authorization']);
+			$token = $separating_bearer[1];
+			$decoded = JWT::decode($token, $key, array('HS256'));
+			
+			$card = new Card();
 
-			$card->name = $data->name;
-			$card->description = $data->description;
-			$card->admin_id = $decoded->id;
+			if(isset($data->name) && isset($data->description)){
 
-			try{
-				$card->save();
-				$response[]="carta añadida";
-            }catch(\Exception $e){
-                $response = $e->getMessage();
+				$card->name = $data->name;
+				$card->description = $data->description;
+				$card->admin_id = $decoded->id;
+
+				try{
+					$card->save();
+					$response[]="carta añadida";
+				}catch(\Exception $e){
+					$response = $e->getMessage();
+				}
+			}else{
+				$response="Params incorrectos";
 			}
 		}else{
-			$response="Datos incorrectos";
+			$response="Json incorrecto";
 		}
 
 		return response()->json($response);
 		
 	}
-	/**
-	 * Devuelve las cartas en venta ordenadas por nombre
-	 */
-	/*public function cardsByName($name){
-
-		$cards = Card::where('name','like','%'.$name.'%')->get();
-		$response = [];
-
-		if(!$cards->isEmpty()){
-		
-			for ($i=0; $i <count($cards) ; $i++) { 
-
-				$response[$i] = [
-					"id" => $cards[$i]->id,
-					"name" => $cards[$i]->name,
-					"description" => $cards[$i]->description
-				];
-				
-				for ($j=0; $j <count($cards[$i]->collection); $j++) { 
-
-					$response[$i][$j]['collection'] = $cards[$i]->collection[$j]->name;
-					$response[$i][$j]['collectionSymbol'] = $cards[$i]->collection[$j]->symbol;
-
-				}
-				
-				$response[$i]['userWhoPostedIt'] = $cards[$i]->admin->username;
-			}	
-		}else{
-			$response = "No cards";
-		}
-		return response()->json($response);
-	}*/
+	
 
 	/**
 	 * Devuelve las cartas en venta ordenadas por nombre
@@ -117,8 +89,7 @@ class CardController extends Controller
 
 		$card = Card::where('name','like','%'.$name.'%')->get()->first();
 		$response = [];
-		$headers = getallheaders();
-		//print_r($headers['Authorization']);
+
 		if(!empty($card)){
 		
 			$response = [
@@ -136,9 +107,8 @@ class CardController extends Controller
 			
 			$response['userWhoPostedIt'] = $card->admin->username;
 			
-		}else{
-			$response = "No cards";
 		}
+
 		return response()->json($response);
 	}
 
@@ -147,7 +117,7 @@ class CardController extends Controller
 	 */
 	public function editCard(Request $request, $id){
 
-		$response = [];
+		$response = "";
 		
 		$data = $request->getContent();
 		$data = json_decode($data);
@@ -155,28 +125,25 @@ class CardController extends Controller
 		if($data){
 
 			$card = Card::find($id);
-			$response[] = "El JSON pasado es correcto";
 
 			if($card){
 
 				$card->name = (isset($data->name) ? $data->name: $card->name);
                 $card->description = (isset($data->description) ? $data->description: $card->description);
-				$response[] ="La carta existe";
 				
 				try{
-
 					$card->save();
-					$response[] = "La carta se ha guardado";
+					$response = "La carta se ha guardado";
 
 				}catch(\Exception $e){
 
-					$response[] = $e->getMessage();
+					$response = $e->getMessage();
 				}
 			}else{
-				$response[] = "No existe dicha carta";
+				$response = "No existe dicha carta";
 			}
 		}else{
-			$response[] = "JSON inválido";
+			$response = "JSON inválido";
 		}
 		
 		return response()->json($response);
@@ -209,8 +176,6 @@ class CardController extends Controller
 				
 				$response[$i]['userWhoPostedIt'] = $cards[$i]->admin->username;
 			}	
-		}else{
-			$response = "No cards";
 		}
 		
 		return response()->json($response);

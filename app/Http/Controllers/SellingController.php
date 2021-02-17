@@ -10,6 +10,8 @@ use App\Http\Helpers\MyJWT;
 
 use \Firebase\JWT\JWT;
 
+use App\Models\Card;
+
 class SellingController extends Controller
 {
 	/**
@@ -18,32 +20,40 @@ class SellingController extends Controller
 	 */
     public function startSelling(Request $request, $id){
 
-		$response = "";
-		$data = $request->getContent();
-		$data = json_decode($data);
+		if(Card::find($id)){
+			$response = "";
+			$data = $request->getContent();
+			$data = json_decode($data);
 
-		$key = MyJWT::getKey();
-		$headers = getallheaders();
-		$separating_bearer = explode(" ", $headers['Authorization']);
-		$token = $separating_bearer[1];
-		$decoded = JWT::decode($token, $key, array('HS256'));
+			if($data){
+				if($data->total_price && $data->quantity){
+				
+					$key = MyJWT::getKey();
+					$headers = getallheaders();
+					$separating_bearer = explode(" ", $headers['Authorization']);
+					$token = $separating_bearer[1];
+					$decoded = JWT::decode($token, $key, array('HS256'));
+					
+					$selling = new Selling();
 
-		if($data){
+					$selling->card_id = $id;
+					$selling->user_id = $decoded->id;
 
-			$selling = new Selling();
+					$selling->total_price = $data->total_price;
+					$selling->quantity = $data->quantity;
 
-			$selling->card_id = $id;
-			$selling->user_id = $decoded->id;
-
-			$selling->total_price = $data->total_price;
-			$selling->quantity = $data->quantity;
-
-			try{
-				$selling->save();
-				$response = "Carta/s en venta";
-			}catch(\Exception $e){
-				$response = $e->getMessage();
+					try{
+						$selling->save();
+						$response = "Carta/s en venta";
+					}catch(\Exception $e){
+						$response = $e->getMessage();
+					}
+				}else{
+					$response = "params incorrectos";
+				}
 			}
+		}else{
+			$response = "No se ha encontrado dicha carta";
 		}
 
 		return response()->json($response);
