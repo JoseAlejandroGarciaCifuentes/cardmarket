@@ -9,8 +9,6 @@ class user extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['username','email','provider', 'provider_id'];
-
     public function admin(){
         return $this->belongsTo(User::class);
     }
