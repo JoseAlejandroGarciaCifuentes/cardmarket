@@ -26,7 +26,7 @@ class UserController extends Controller
 		if($data){
             if(isset($data->username)&&isset($data->email)&&isset($data->password)&&isset($data->role)){
 
-                if(User::where('username', $data->username)->get()->first()&&!User::where('email', $data->email)->get()->first()){
+                if(!User::where('username', $data->username)->get()->first()&&!User::where('email', $data->email)->get()->first()){
 
                     if($data->role !== "Administrator"){
 
@@ -44,13 +44,13 @@ class UserController extends Controller
                             $response = $e->getMessage();
                         }
                     }else{
-                        $response = "params invalidos";
+                        $response = "Tu cuenta no ha sido creada, no puedes ponerte rol de Admin, prueba 'Individual' o 'Professional'";
                     }
                 }else{
                     $response = "username o email cogido";
                 }
             }else{
-                $response = "Tu cuenta no ha sido creada, no puedes ponerte rol de Admin, prueba 'Individual' o 'Professional'";
+                $response = "params invalidos";
             }
 		}else{
 			$response = "No has introducido un usuario válido";
@@ -123,10 +123,10 @@ class UserController extends Controller
                         $response = $e->getMessage();
                     }
                 }else{
-                    $response = "email no corresponde a ningun user";
+                    $response = "600";
                 }
             }else{
-                $response = "params invalidos"; 
+                $response = "700"; 
             }
         }else{
             $response = "json invalido";
