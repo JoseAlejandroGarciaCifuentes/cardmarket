@@ -14,13 +14,14 @@ use App\Http\Controllers\LoginController;
 |
 */
 
-/*Route::get('/', function () {
+Route::get('/', function () {
     return view('welcome');
-});*/
+});
 
-Route::get('login', 'LoginController@index');
-Route::get('login/{provider}', 'LoginController@redirectToProvider');
-Route::get('{provider}/callback', 'LoginController@handleProviderCallback');
+Route::get('/login', [LoginController::class, 'index']);
+Route::get('login/{provider}', [LoginController::class, 'redirectToProvider']);
+Route::get('{provider}/callback', [LoginController::class, 'handleProviderCallback']);
+
 Route::get('/home', function () {
-    return 'User is logged in';
+    return 'User logged in succesfully';
 });
